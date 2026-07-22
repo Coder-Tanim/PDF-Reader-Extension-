@@ -43,7 +43,7 @@
 
     applyRotation(pageNum) {
       const viewer = document.getElementById('viewer');
-      const pageEl = viewer.querySelector(`[data-page-number="${pageNum}"]`);
+      const pageEl = viewer.querySelector(`[data-page="${pageNum}"]`);
       
       if (!pageEl) return;
 
