@@ -322,6 +322,9 @@
       state.rendering = false;
       state.pageCache[pageNum] = { canvas, viewport: unscaledViewport };
 
+      /* Render text layer for text selection */
+      renderTextLayer(page, container, viewport, pageNum);
+
       /* Render annotations if interactive forms enabled */
       if (state.settings.interactiveForms) {
         renderAnnotationLayer(page, container, viewport, pageNum);
@@ -351,6 +354,31 @@
       viewport: printAnnotationViewport,
       linkService: { getDestinationHash: () => "#", getAnchorUrl: () => "", getOpenAction: () => {} },
       renderInteractiveForms: state.settings.interactiveForms
+    });
+  }
+
+  function renderTextLayer(page, container, viewport, pageNum) {
+    /* Get text content from the page */
+    page.getTextContent().then((textContent) => {
+      /* Create text layer div */
+      let textLayerDiv = container.querySelector(".text-layer");
+      if (!textLayerDiv) {
+        textLayerDiv = document.createElement("div");
+        textLayerDiv.className = "text-layer";
+        container.appendChild(textLayerDiv);
+      }
+
+      /* Render text layer using PDF.js TextLayer */
+      const textViewport = page.getViewport({ scale: state.scale });
+      const textDivs = [];
+      pdfjsLib.TextLayer.render({
+        textContentSource: textContent,
+        container: textLayerDiv,
+        viewport: textViewport,
+        textDivs: textDivs
+      });
+    }).catch((err) => {
+      console.error(`Error rendering text layer for page ${pageNum}:`, err);
     });
   }
 
@@ -1023,3 +1051,149 @@
     start();
   }
 })();
+
+/* ═══════════════ NEW FEATURES INTEGRATION ═══════════════ */
+
+// Initialize new feature modules
+function initNewFeatures() {
+  // Initialize search
+  if (window.SearchModule) {
+    window.SearchModule.init();
+    
+    // Bind search input
+    const searchInput = document.getElementById('search-input');
+    const searchNext = document.getElementById('btn-search-next');
+    const searchPrev = document.getElementById('btn-search-prev');
+    
+    if (searchInput) {
+      let searchTimeout;
+      searchInput.addEventListener('input', (e) => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          window.SearchModule.performSearch(e.target.value);
+        }, 300);
+      });
+      
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          if (e.shiftKey) {
+            window.SearchModule.prevResult();
+          } else {
+            window.SearchModule.nextResult();
+          }
+        }
+      });
+    }
+    
+    if (searchNext) searchNext.addEventListener('click', () => window.SearchModule.nextResult());
+    if (searchPrev) searchPrev.addEventListener('click', () => window.SearchModule.prevResult());
+  }
+  
+  // Initialize bookmarks
+  if (window.BookmarkManager) {
+    window.BookmarkManager.init();
+  }
+  
+  // Initialize text highlight
+  if (window.TextHighlight) {
+    window.TextHighlight.init();
+  }
+  
+  // Initialize page rotate
+  if (window.PageRotate) {
+    window.PageRotate.init();
+  }
+  
+  // Initialize PDF merge/split
+  if (window.PdfMergeSplit) {
+    window.PdfMergeSplit.init();
+    
+    // Bind split panel buttons
+    const splitSeparate = document.getElementById('split-separate');
+    const splitCombined = document.getElementById('split-combined');
+    const splitCancel = document.getElementById('split-cancel');
+    const splitPages = document.getElementById('split-pages');
+    
+    if (splitSeparate) {
+      splitSeparate.addEventListener('click', () => {
+        PdfMergeSplit.splitPdf(splitPages.value, 'separate');
+        document.getElementById('split-panel').classList.add('hidden');
+      });
+    }
+    
+    if (splitCombined) {
+      splitCombined.addEventListener('click', () => {
+        PdfMergeSplit.splitPdf(splitPages.value, 'combined');
+        document.getElementById('split-panel').classList.add('hidden');
+      });
+    }
+    
+    if (splitCancel) {
+      splitCancel.addEventListener('click', () => {
+        document.getElementById('split-panel').classList.add('hidden');
+      });
+    }
+  }
+  
+  // Initialize reading modes
+  if (window.ReadingModes) {
+    window.ReadingModes.init();
+  }
+  
+  // Initialize export page images
+  if (window.ExportPageImages) {
+    window.ExportPageImages.init();
+    
+    // Bind export buttons
+    const exportCurrentPng = document.getElementById('export-current-png');
+    const exportAllPng = document.getElementById('export-all-png');
+    const exportAllZip = document.getElementById('export-all-zip');
+    
+    if (exportCurrentPng) {
+      exportCurrentPng.addEventListener('click', () => {
+        ExportPageImages.exportCurrentPage('png');
+        document.getElementById('export-images-panel').classList.add('hidden');
+      });
+    }
+    
+    if (exportAllPng) {
+      exportAllPng.addEventListener('click', () => {
+        ExportPageImages.exportAllPages('png');
+        document.getElementById('export-images-panel').classList.add('hidden');
+      });
+    }
+    
+    if (exportAllZip) {
+      exportAllZip.addEventListener('click', () => {
+        ExportPageImages.exportAsZip('png');
+        document.getElementById('export-images-panel').classList.add('hidden');
+      });
+    }
+  }
+  
+  // Add bookmarks tab to sidebar
+  const sidebarTabs = document.querySelector('.sidebar-tabs');
+  if (sidebarTabs) {
+    const bookmarksTab = document.createElement('button');
+    bookmarksTab.className = 'sidebar-tab';
+    bookmarksTab.dataset.tab = 'bookmarks';
+    bookmarksTab.textContent = 'Bookmarks';
+    sidebarTabs.appendChild(bookmarksTab);
+    
+    bookmarksTab.addEventListener('click', () => {
+      document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.sidebar-content').forEach(c => c.classList.remove('active'));
+      bookmarksTab.classList.add('active');
+      document.getElementById('sidebar-bookmarks').classList.add('active');
+      if (window.BookmarkManager) window.BookmarkManager.renderBookmarks();
+    });
+  }
+}
+
+// Call initNewFeatures after DOM is loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initNewFeatures);
+} else {
+  initNewFeatures();
+}

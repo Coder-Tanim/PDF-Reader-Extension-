@@ -337,6 +337,13 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="modules/search.js"></script>
+  <script src="modules/bookmark-manager.js"></script>
+  <script src="modules/text-highlight.js"></script>
+  <script src="modules/page-rotate.js"></script>
+  <script src="modules/pdf-merge-split.js"></script>
+  <script src="modules/reading-modes.js"></script>
+  <script src="modules/export-page-images.js"></script>
   <script src="modules/theme-manager.js"></script>
   <script src="modules/storage.js"></script>
   <script src="modules/drawing-tools.js"></script>
@@ -345,3 +352,55 @@
   <script src="viewer.js"></script>
 </body>
 </html>
+
+  <!-- ═══════════════ SEARCH PANEL ═══════════════ -->
+  <div id="search-panel" class="floating-panel hidden">
+    <div class="panel-header">
+      <span>Search</span>
+      <button class="panel-close" data-close="search-panel">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search in document...">
+        <button id="btn-search-prev" class="tb-btn-sm" title="Previous (Shift+Enter)">↑</button>
+        <button id="btn-search-next" class="tb-btn-sm" title="Next (Enter)">↓</button>
+      </div>
+      <div id="search-count" class="search-count">0 result(s)</div>
+      <div id="search-results" class="search-results"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SPLIT PANEL ═══════════════ -->
+  <div id="split-panel" class="floating-panel hidden">
+    <div class="panel-header">
+      <span>Split PDF</span>
+      <button class="panel-close" data-close="split-panel">&times;</button>
+    </div>
+    <div class="panel-body">
+      <p class="panel-hint">Enter page ranges to split (e.g., 1-3,5,7-9)</p>
+      <input type="text" id="split-pages" placeholder="Pages to extract" style="width:100%;margin-bottom:10px;">
+      <div class="extract-actions">
+        <button id="split-separate" class="panel-btn">Separate Files</button>
+        <button id="split-combined" class="panel-btn primary">Single PDF</button>
+        <button id="split-cancel" class="panel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ EXPORT IMAGES PANEL ═══════════════ -->
+  <div id="export-images-panel" class="floating-panel hidden">
+    <div class="panel-header">
+      <span>Export as Images</span>
+      <button class="panel-close" data-close="export-images-panel">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="export-options">
+        <button id="export-current-png" class="panel-btn">Current Page PNG</button>
+        <button id="export-all-png" class="panel-btn">All Pages PNG</button>
+        <button id="export-all-zip" class="panel-btn primary">All Pages ZIP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ BOOKMARKS SIDEBAR TAB ═══════════════ -->
+  <div id="sidebar-bookmarks" class="sidebar-content hidden"></div>
