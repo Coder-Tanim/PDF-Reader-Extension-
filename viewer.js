@@ -694,6 +694,18 @@
     });
 
     /* Tool panels */
+    $("#btn-search").addEventListener("click", () => {
+      SearchModule.toggleSearchPanel();
+    });
+    $("#btn-bookmark").addEventListener("click", () => togglePanel("bookmark-panel", null));
+    $("#btn-highlight").addEventListener("click", () => {
+      TextHighlight.toggleHighlightMode();
+      togglePanel("highlight-panel", null);
+    });
+    $("#btn-rotate").addEventListener("click", () => togglePanel("rotate-panel", null));
+    $("#btn-reading-mode").addEventListener("click", () => togglePanel("reading-mode-panel", null));
+    $("#btn-split").addEventListener("click", () => togglePanel("split-panel", null));
+    $("#btn-export-images").addEventListener("click", () => togglePanel("export-images-panel", null));
     $("#btn-annotate").addEventListener("click", () => togglePanel("annotate-panel", "annotate"));
     $("#btn-draw").addEventListener("click", () => togglePanel("draw-panel", "draw"));
     $("#btn-crop").addEventListener("click", () => togglePanel("crop-panel", "crop"));
@@ -1093,16 +1105,94 @@ function initNewFeatures() {
   // Initialize bookmarks
   if (window.BookmarkManager) {
     window.BookmarkManager.init();
+
+    // Bind bookmark panel buttons
+    const bookmarkAdd = document.getElementById('bookmark-add');
+    const bookmarkExport = document.getElementById('bookmark-export');
+    const bookmarkImport = document.getElementById('bookmark-import');
+    const bookmarkImportInput = document.getElementById('bookmark-import-input');
+
+    if (bookmarkAdd) {
+      bookmarkAdd.addEventListener('click', () => {
+        BookmarkManager.addBookmark(state.currentPage);
+        BookmarkManager.renderBookmarks();
+      });
+    }
+
+    if (bookmarkExport) {
+      bookmarkExport.addEventListener('click', () => BookmarkManager.exportBookmarks());
+    }
+
+    if (bookmarkImport) {
+      bookmarkImport.addEventListener('click', () => bookmarkImportInput.click());
+    }
+
+    if (bookmarkImportInput) {
+      bookmarkImportInput.addEventListener('change', (e) => BookmarkManager.importBookmarks(e));
+    }
   }
-  
+
   // Initialize text highlight
   if (window.TextHighlight) {
     window.TextHighlight.init();
+
+    // Bind highlight panel buttons
+    const highlightClear = document.getElementById('highlight-clear');
+    const highlightColor = document.getElementById('highlight-color');
+
+    if (highlightClear) {
+      highlightClear.addEventListener('click', () => {
+        TextHighlight.clearAllHighlights();
+        document.getElementById('highlight-panel').classList.add('hidden');
+      });
+    }
+
+    if (highlightColor) {
+      highlightColor.addEventListener('change', (e) => {
+        TextHighlight.activeColor = e.target.value;
+      });
+    }
   }
-  
+
   // Initialize page rotate
   if (window.PageRotate) {
     window.PageRotate.init();
+
+    // Bind rotate panel buttons
+    const rotateLeft = document.getElementById('rotate-left');
+    const rotateRight = document.getElementById('rotate-right');
+    const rotateReset = document.getElementById('rotate-reset');
+
+    if (rotateLeft) {
+      rotateLeft.addEventListener('click', () => PageRotate.rotateCurrentPage(-90));
+    }
+
+    if (rotateRight) {
+      rotateRight.addEventListener('click', () => PageRotate.rotateCurrentPage(90));
+    }
+
+    if (rotateReset) {
+      rotateReset.addEventListener('click', () => {
+        PageRotate.resetRotation(state.currentPage);
+        document.getElementById('rotate-panel').classList.add('hidden');
+      });
+    }
+  }
+
+  // Initialize reading modes with panel buttons
+  if (window.ReadingModes) {
+    window.ReadingModes.init();
+
+    // Bind reading mode panel buttons
+    ['single', 'continuous', 'two-page'].forEach(mode => {
+      const btn = document.getElementById(`mode-${mode}`);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          ReadingModes.setMode(mode);
+          document.getElementById('reading-mode-panel').classList.add('hidden');
+        });
+      }
+    });
   }
   
   // Initialize PDF merge/split

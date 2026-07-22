@@ -296,7 +296,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 1;
+  z-index: 10;
   pointer-events: all;
   user-select: text;
   -webkit-user-select: text;
@@ -309,7 +309,7 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); ou
   color: transparent;
   white-space: pre;
   transform-origin: 0% 0%;
-  pointer-events: none;
+  pointer-events: all;
 }
 
 .text-layer ::selection {
