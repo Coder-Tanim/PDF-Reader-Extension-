@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDFZero</title>
+  <link rel="stylesheet" href="viewer.css">
+  <!-- PDF.js & pdf-lib loaded via ES module bootstrap -->
+  <script src="pdf-bootstrap.js" type="module"></script>
+</head>
+<body>
+
+  <!-- ═══════════════ TOOLBAR ═══════════════ -->
+  <header id="toolbar">
+    <div class="toolbar-group toolbar-left">
+      <!-- Sidebar toggle -->
+      <button id="btn-sidebar" class="tb-btn" title="Toggle Sidebar (Ctrl+Alt+B)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      </button>
+
+      <span class="toolbar-separator"></span>
+
+      <!-- Page navigation -->
+      <button id="btn-prev" class="tb-btn" title="Previous Page (↑)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <input id="page-num" type="number" min="1" value="1" class="page-input">
+      <span id="page-count" class="page-info">/ 0</span>
+      <button id="btn-next" class="tb-btn" title="Next Page (↓)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+
+      <span class="toolbar-separator"></span>
+
+      <!-- Zoom -->
+      <button id="btn-zoom-out" class="tb-btn" title="Zoom Out (Ctrl+-)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+      <select id="zoom-select" class="zoom-select" title="Zoom Level">
+        <option value="0.25">25%</option>
+        <option value="0.5">50%</option>
+        <option value="0.75">75%</option>
+        <option value="1" selected>100%</option>
+        <option value="1.25">125%</option>
+        <option value="1.5">150%</option>
+        <option value="2">200%</option>
+        <option value="3">300%</option>
+        <option value="auto">Auto</option>
+      </select>
+      <button id="btn-zoom-in" class="tb-btn" title="Zoom In (Ctrl++)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+      </button>
+    </div>
+
+    <div class="toolbar-group toolbar-center">
+      <span id="doc-title" class="doc-title" title="Document Title">PDFZero</span>
+    </div>
+
+    <div class="toolbar-group toolbar-right">
+      <!-- Annotation tools -->
+      <button id="btn-annotate" class="tb-btn" title="Annotations" data-toggle="annotate-panel">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </button>
+      <!-- Draw / Signature -->
+      <button id="btn-draw" class="tb-btn" title="Draw / Signature" data-toggle="draw-panel">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
+      </button>
+
+      <span class="toolbar-separator"></span>
+
+      <!-- Export tools -->
+      <button id="btn-crop" class="tb-btn" title="Crop Page">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
+      </button>
+      <button id="btn-remove" class="tb-btn" title="Remove Pages" data-toggle="remove-panel">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+      </button>
+
+      <span class="toolbar-separator"></span>
+
+      <!-- Print -->
+      <button id="btn-print" class="tb-btn" title="Print (Ctrl+P)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      </button>
+      <!-- Download -->
+      <button id="btn-download" class="tb-btn" title="Download">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+
+      <span class="toolbar-separator"></span>
+
+      <!-- Settings -->
+      <button id="btn-settings" class="tb-btn" title="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <!-- Theme toggle -->
+      <button id="btn-theme" class="tb-btn" title="Toggle Theme">
+        <svg id="icon-theme" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══════════════ MAIN AREA ═══════════════ -->
+  <div id="main-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-tabs">
+        <button class="sidebar-tab active" data-tab="thumbnails">Thumbnails</button>
+        <button class="sidebar-tab" data-tab="outline">Outline</button>
+      </div>
+      <div id="sidebar-thumbnails" class="sidebar-content active"></div>
+      <div id="sidebar-outline" class="sidebar-content"></div>
+    </aside>
+
+    <!-- Viewer -->
+    <div id="viewer-container">
+      <div id="viewer" class="viewer">
+        <!-- Pages are rendered here dynamically -->
+      </div>
+      <!-- Drop overlay -->
+      <div id="drop-overlay" class="drop-overlay hidden">
+        <div class="drop-message">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <p>Drop PDF file here</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ ANNOTATION PANEL ═══════════════ -->
+  <div id="annotate-panel" class="floating-panel hidden">
+    <div class="panel-header">
+      <span>Annotations</span>
+      <button class="panel-close" data-close="annotate-panel">&times;</button>
+    </div>
+    <div class="panel-body">
+      <button id="ann-text" class="ann-btn" title="Insert Text">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+        <span>Text</span>
+      </button>
+      <button id="ann-image" class="ann-btn" title="Insert Image">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        <span>Image</span>
+      </button>
+      <input type="file" id="ann-image-input" accept="image/*" style="display:none">
+      <div class="ann-options">
+        <label>Color <input type="color" id="ann-color" value="#ff0000"></label>
+        <label>Size <input type="number" id="ann-font-size" value="16" min="8" max="72" step="1"></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DRAW PANEL ═══════════════ -->
+  <div id="draw-panel" class="floating-panel hidden">
+    <div class="panel-header">
+      <span>Draw / Signature</span>
+      <button class="panel-close" data-close="draw-panel">&times;</button>
+    </div>
+    <div class="panel-body">
+      <div class="draw-tools">
+        <button id="draw-pen" class="draw-tool active" title="Pen">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/></svg>
+        </button>
+        <button id="draw-eraser" class="draw-tool" title="Eraser">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 20H7L3 16l9-9 8 8-4 4z"/><line x1="7" y1="20" x2="20" y2="20"/></svg>
+        </button>
+      </div>
+      <div class="draw-options">
+        <label>Color <input type="color" id="draw-color" value="#000000"></label>
+        <label>Width <input type="range" id="draw-width" min="1" max="10" value="2"></label>
+        <span id="draw-width-val">2px</span>
+      </div>
+      <div class="draw-actions">
+        <button id="draw-clear" class="panel-btn">Clear</button>
+        <button id="draw-save" class="panel-btn primary">Apply to Page</button>
+        <button id="draw-cancel" class="panel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ CROP PANEL ═══════════════ -->
+  <div id="crop-panel" class="floating-panel hidden">
+    <div class="panel-header">
+      <span>Crop Page</span>
+      <button class="panel-close" data-close="crop-panel">&times;</button>
+    </div>
+    <div class="panel-body">
+      <p class="panel-hint">Click and drag on the page to select a crop area.</p>
+      <div class="crop-actions">
+        <button id="crop-apply" class="panel-btn primary">Export Cropped</button>
+        <button id="crop-cancel" class="panel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ REMOVE PANEL ═══════════════ -->
+  <div id="remove-panel" class="floating-panel hidden">
+    <div class="panel-header">
+      <span>Remove Pages</span>
+      <button class="panel-close" data-close="remove-panel">&times;</button>
+    </div>
+    <div class="panel-body">
+      <p class="panel-hint">Enter page numbers to remove (comma-separated or ranges).<br>Example: <code>1,3,5-8</code></p>
+      <div class="extract-form">
+        <label>Pages to Remove <input type="text" id="remove-pages" placeholder="e.g. 1,3,5-8" style="width:160px"></label>
+      </div>
+      <div class="extract-actions">
+        <button id="remove-apply" class="panel-btn primary">Remove & Download</button>
+        <button id="remove-cancel" class="panel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════ SETTINGS PANEL ═══════════════ -->
+  <div id="settings-panel" class="floating-panel settings-panel hidden">
+    <div class="panel-header">
+      <span>Settings</span>
+      <button class="panel-close" data-close="settings-panel">&times;</button>
+    </div>
+    <div class="panel-body settings-body">
+      <!-- Appearance -->
+      <section class="settings-section">
+        <h3>Appearance</h3>
+        <div class="setting-row">
+          <label>Theme</label>
+          <select id="set-theme">
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+        <div class="setting-row">
+          <label>Background Color</label>
+          <input type="color" id="set-bg-color" value="#525659">
+        </div>
+        <div class="setting-row">
+          <label>Layout Density</label>
+          <select id="set-density">
+            <option value="compact">Compact</option>
+            <option value="normal" selected>Normal</option>
+            <option value="comfortable">Comfortable</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Rendering Options -->
+      <section class="settings-section">
+        <h3>Rendering</h3>
+        <div class="setting-row">
+          <label>Enable WebGL</label>
+          <input type="checkbox" id="set-webgl">
+        </div>
+        <div class="setting-row">
+          <label>Auto-Rotate</label>
+          <input type="checkbox" id="set-auto-rotate" checked>
+        </div>
+        <div class="setting-row">
+          <label>Use Only CSS Zoom</label>
+          <input type="checkbox" id="set-css-zoom">
+        </div>
+        <div class="setting-row">
+          <label>Disable Page Labels</label>
+          <input type="checkbox" id="set-disable-labels">
+        </div>
+        <div class="setting-row">
+          <label>Disable Auto Fetch</label>
+          <input type="checkbox" id="set-disable-autofetch">
+        </div>
+        <div class="setting-row">
+          <label>Disable Font Face</label>
+          <input type="checkbox" id="set-disable-fontface">
+        </div>
+        <div class="setting-row">
+          <label>Disable Range Requests</label>
+          <input type="checkbox" id="set-disable-range">
+        </div>
+        <div class="setting-row">
+          <label>Disable Stream</label>
+          <input type="checkbox" id="set-disable-stream">
+        </div>
+      </section>
+
+      <!-- Behavior -->
+      <section class="settings-section">
+        <h3>Behavior</h3>
+        <div class="setting-row">
+          <label>Enable Permissions</label>
+          <input type="checkbox" id="set-enforce-perms">
+        </div>
+        <div class="setting-row">
+          <label>Enable Print</label>
+          <input type="checkbox" id="set-enable-print" checked>
+        </div>
+        <div class="setting-row">
+          <label>History Update</label>
+          <input type="checkbox" id="set-history-update" checked>
+        </div>
+        <div class="setting-row">
+          <label>URL Update</label>
+          <input type="checkbox" id="set-url-update" checked>
+        </div>
+        <div class="setting-row">
+          <label>Ignore Destination Zoom</label>
+          <input type="checkbox" id="set-ignore-dest-zoom">
+        </div>
+        <div class="setting-row">
+          <label>PDF Bug Enabled (Legacy)</label>
+          <input type="checkbox" id="set-pdf-bug">
+        </div>
+        <div class="setting-row">
+          <label>Render Interactive Forms</label>
+          <input type="checkbox" id="set-interactive-forms" checked>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ═══════════════ TEXT ANNOTATION INPUT (floating) ═══════════════ -->
+  <div id="text-annot-input" class="text-annot-input hidden">
+    <textarea id="text-annot-field" rows="3" placeholder="Type annotation text…"></textarea>
+    <div class="text-annot-actions">
+      <button id="text-annot-ok" class="panel-btn primary">OK</button>
+      <button id="text-annot-cancel" class="panel-btn">Cancel</button>
+    </div>
+  </div>
+
+  <!-- ═══════════════ LOADING OVERLAY ═══════════════ -->
+  <div id="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p id="loading-text">Loading PDF…</p>
+  </div>
+
+  <!-- ═══════════════ STATUS BAR ═══════════════ -->
+  <footer id="status-bar">
+    <span id="status-text">Ready</span>
+    <span id="status-credit">Made by <a href="https://www.linkedin.com/in/ishtiaque2/" target="_blank" rel="noopener noreferrer">Tanim</a></span>
+    <span id="status-zoom">100%</span>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="modules/theme-manager.js"></script>
+  <script src="modules/storage.js"></script>
+  <script src="modules/drawing-tools.js"></script>
+  <script src="modules/annotation-tools.js"></script>
+  <script src="modules/export-tools.js"></script>
+  <script src="viewer.js"></script>
+</body>
+</html>
